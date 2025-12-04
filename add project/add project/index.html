@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Product Catalogue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow p-4">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-blue-600">ShopHub</h1>
+
+            <input id="searchInput" 
+                   type="text" 
+                   placeholder="Search products..."
+                   class="px-4 py-2 border rounded-lg w-64">
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="max-w-6xl mx-auto p-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+
+        <!-- Filters -->
+        <aside class="bg-white p-4 rounded shadow h-fit">
+            <h2 class="font-bold mb-3">Filters</h2>
+
+            <!-- Category -->
+            <label class="block font-semibold mb-1">Category</label>
+            <select id="categoryFilter" class="w-full border rounded p-2 mb-4">
+                <option value="all">All</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Fashion">Fashion</option>
+                <option value="Home">Home & Kitchen</option>
+                <option value="Sports">Sports</option>
+                <option value="Books">Books</option>
+            </select>
+
+            <!-- Price Range -->
+            <label class="block font-semibold mb-1">Min Price</label>
+            <input id="minPrice" type="number" class="w-full border rounded p-2 mb-3">
+
+            <label class="block font-semibold mb-1">Max Price</label>
+            <input id="maxPrice" type="number" class="w-full border rounded p-2 mb-4">
+
+            <!-- Sorting -->
+            <label class="block font-semibold mb-1">Sort By</label>
+            <select id="sortBy" class="w-full border rounded p-2 mb-4">
+                <option value="">None</option>
+                <option value="asc">Price: Low to High</option>
+                <option value="desc">Price: High to Low</option>
+            </select>
+
+            <button id="resetBtn" class="w-full bg-blue-600 text-white py-2 rounded">Reset</button>
+        </aside>
+
+        <!-- Product List -->
+        <main class="md:col-span-3">
+            <h2 class="text-xl font-bold mb-4">
+                Products <span id="productCount">(0)</span>
+            </h2>
+
+            <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+            <p id="emptyMessage" class="text-center text-gray-500 mt-10 hidden">
+                No products found.
+            </p>
+        </main>
+    </div>
+
+
+    <!-- JavaScript -->
+    <script>
+        const products = [
+            { id: 1, name: "Smartphone", category: "Electronics", price: 699 },
+            { id: 2, name: "Sneakers", category: "Fashion", price: 59 },
+            { id: 3, name: "Microwave Oven", category: "Home", price: 120 },
+            { id: 4, name: "Football", category: "Sports", price: 40 },
+            { id: 5, name: "Novel - The Alchemist", category: "Books", price: 15 },
+        ];
+
+        const grid = document.getElementById("productsGrid");
+        const count = document.getElementById("productCount");
+        const emptyMsg = document.getElementById("emptyMessage");
+
+        function renderProducts(list) {
+            grid.innerHTML = "";
+            count.textContent = `(${list.length})`;
+            
+            if (list.length === 0) {
+                emptyMsg.classList.remove("hidden");
+                return;
+            }
+
+            emptyMsg.classList.add("hidden");
+
+            list.forEach(p => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 shadow rounded">
+                        <h3 class="font-bold">${p.name}</h3>
+                        <p class="text-gray-600">${p.category}</p>
+                        <p class="font-semibold mt-2">$${p.price}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function applyFilters() {
+            let filtered = [...products];
+
+            const search = document.getElementById("searchInput").value.toLowerCase();
+            const category = document.getElementById("categoryFilter").value;
+            const min = Number(document.getElementById("minPrice").value);
+            const max = Number(document.getElementById("maxPrice").value);
+            const sort = document.getElementById("sortBy").value;
+
+            if (search)
+                filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
+
+            if (category !== "all")
+                filtered = filtered.filter(p => p.category === category);
+
+            if (min) filtered = filtered.filter(p => p.price >= min);
+            if (max) filtered = filtered.filter(p => p.price <= max);
+
+            if (sort === "asc") filtered.sort((a, b) => a.price - b.price);
+            if (sort === "desc") filtered.sort((a, b) => b.price - a.price);
+
+            renderProducts(filtered);
+        }
+
+        // Event Listeners
+        document.querySelectorAll("input, select").forEach(el => {
+            el.addEventListener("input", applyFilters);
+        });
+
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            document.querySelectorAll("input").forEach(i => i.value = "");
+            document.querySelectorAll("select").forEach(s => s.value = "all");
+            applyFilters();
+        });
+
+        renderProducts(products);
+    </script>
+</body>
+</html>
